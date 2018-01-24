@@ -167,7 +167,98 @@ def dropapk(data):
         download(url,file_name,id)
     else:
         print 'dropapk.com网站的下载链接没有匹配到'
-def farsroid(data):
+def directapk(data):
+    url = data[1]
+    print url
+    # proxy = get_proxy()
+    proxy = 0
+    s = requests.session()
+    if proxy:
+        text = s.get(url, proxies=proxy).text
+    else:
+        text = s.get(url).text
+    re_url = re.compile(r"<a class='btn btn-default-dl' href='(.*?)'>download now</a>")
+    url = re.search(re_url, text)
+    re_type = re.compile(r'File:(.*?)<br/>')
+    file_type = re.search(re_type, text)
+    if url:
+        if file_type:
+            urls = url.group(1)
+            print urls
+            file_type = file_type.group(1).strip()[-4:]
+            id = data[0]
+            file_name = '/users/qiyue/myxuni/pngtree/obb_download/' + data[2] + file_type
+            print file_name
+            start = time.time()
+            r = s.get(urls, stream=True)
+            with open(file_name, "wb") as code:
+                for chunk in r.iter_content(chunk_size=512):
+                    if chunk:
+                        code.write(chunk)
+            end = time.time()
+            used_time = end - start
+            print '文件下载完成,用时%s秒' % used_time
+            db = MySQLdb.connect('localhost', 'root', '123456', 'test')
+            cursor = db.cursor()
+            sql = 'update download set status=2,path="%s" where id=%s' % (file_name, id)
+            try:
+                cursor.execute(sql)
+                db.commit()
+                print '本地存储路径更新完成'
+            except Exception, e:
+                db.rollback()
+                print str(e)
+    else:
+        print 'android网站,未匹配到下载的URL'
+def apptoko(data):
+    url = data[1]
+    print url
+    # proxy = get_proxy()
+    proxy = 0
+    s = requests.session()
+    if proxy:
+        text = s.get(url, proxies=proxy).text
+    else:
+        text = s.get(url).text
+    re_id = re.compile(r'<option value="(\w+?)">.*?</option>')
+    version_id = re.search(re_id, text)
+    if version_id:
+        version_id = version_id.group(1)
+        print version_id
+        post_data = {'version_id':version_id}
+        text = s.post('https://apptoko.com/android/android/general_download',data=post_data).text
+        print text
+        re_url = re.compile(r'"download":"(.*?)"')
+        urlss = re.search(re_url, text)
+        if urlss:
+            urls = urlss.group(1).replace('\\','')
+            print urls
+            file_type = urls[-4:]
+            id = data[0]
+            file_name = '/users/qiyue/myxuni/pngtree/obb_download/' + data[2] + file_type
+            print file_name
+            start = time.time()
+            r = s.get(urls, stream=True)
+            with open(file_name, "wb") as code:
+                for chunk in r.iter_content(chunk_size=512):
+                    if chunk:
+                        code.write(chunk)
+            end = time.time()
+            used_time = end - start
+            print '文件下载完成,用时%s秒' % used_time
+            db = MySQLdb.connect('localhost', 'root', '123456', 'test')
+            cursor = db.cursor()
+            sql = 'update download set status=2,path="%s" where id=%s' % (file_name, id)
+            try:
+                cursor.execute(sql)
+                db.commit()
+                print '本地存储路径更新完成'
+            except Exception, e:
+                db.rollback()
+                print str(e)
+    else:
+        print 'apptoko网站,未匹配到下载的URL'
+def simple_download(data):
     url = data[1]
     print url
     file_type = url[-4:]
@@ -199,6 +290,8 @@ def get_data():
     except Exception, e:
         db.rollback()
         print str(e)
+
+
 if __name__ == '__main__':
     # 获取要下载的链接,从数据库中
     data = get_data()
@@ -214,7 +307,16 @@ if __name__ == '__main__':
         elif def_name == 'dropapk.com':
             dropapk(data)
         elif def_name == 'www.dl.farsroid.com':
-            farsroid(data)
+            simple_download(data)
+        elif def_name == 'www.directapk.net':
+            directapk(data)
+        elif def_name == 'download.directapk.net':
+            if data[1][-4] == '.':
+                simple_download(data)
+            else:
+                print 'url跟预期不一样,无法下载'
+        elif def_name == 'apptoko.com':
+            apptoko(data)
         else:
             print 'url不在该脚本处理范围内'
     else:
