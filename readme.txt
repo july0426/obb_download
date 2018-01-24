@@ -29,6 +29,21 @@
     这个最终的链接是http://server01.dropapk.com:182/d/apc7next4tcdvbi4rgyzhxac2ouhz2v4qpplxuqh3vai7tij7sj4b46ufz3stfforyejojsr/com.blayzegames.iosfps.zip
     d/后面的一长串,是变化的
 
-5.www.dl.farsroid.com
+5.www.dl.farsroid.com    download.directapk.net  URL的结尾是.apk/.zip/.obb的直接下载就可以.
     http://www.dl.farsroid.com/game/Lost-Lands-5-Full-1.0.1(www.Farsroid.com).zip
+    http://download.directapk.net/get/2018/01/com.bigfishgames.ritepassageheartstormgoog.zip
     这个直接就能下载
+
+6.apptoko.com
+    https://apptoko.com/android/details?id=com.Xiibi.Prince
+    用session,他需要cookie
+    访问URL,获取一个ID,266485,然后post  https://apptoko.com/android/android/general_download
+    post_data = {'version_id':version_id} ID就是匹配下来的
+    返回一个json数据,正则匹配出download URL
+    http://dl22.sopcast.mobi/download/s/20161007/diUcvmq4izpg0o8sMFRc_g/1516957179/Deiland_1.3.1.apk
+    
+7.www.directapk.net
+    http://www.directapk.net/1Mkr
+    使用session,连续请求2次,和谷歌云盘一样的套路.
+    请求URL,正则匹配出download URL
+    http://www.directapk.net/1Mkr?pt=9Rv%2Bz5WgNGeDz2XV6hFKz5ZCGsUB%2BORpuU4XJCjUjr0%3D
